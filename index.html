@@ -1,0 +1,1092 @@
+<!doctype html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>失智症家人行為問卷與自我效能量表</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ["Noto Sans TC", "ui-sans-serif", "system-ui"],
+                    },
+                    colors: {
+                        ink: "#0f172a",
+                        mist: "#f5f7fb",
+                        lagoon: "#0ea5a8",
+                        coral: "#f97316",
+                        iris: "#6366f1",
+                        pine: "#0f766e",
+                    },
+                    boxShadow: {
+                        card: "0 12px 32px -18px rgba(2, 6, 23, 0.35)",
+                    },
+                },
+            },
+        };
+    </script>
+</head>
+
+<body class="bg-mist text-ink">
+    <div id="app" class="min-h-screen">
+        <div
+            class="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_20%_10%,rgba(14,165,168,0.18),transparent_55%),radial-gradient(circle_at_80%_0%,rgba(249,115,22,0.14),transparent_50%)]">
+        </div>
+        <header class="mx-auto max-w-5xl px-5 pt-10">
+            <div class="rounded-3xl bg-white/90 p-8 shadow-card backdrop-blur">
+                <p class="text-sm font-semibold tracking-[0.2em] text-lagoon">
+                    BEHAVIOR & SELF-EFFICACY SURVEY
+                </p>
+                <h1 class="mt-3 text-3xl font-bold sm:text-4xl">
+                    失智症家人行為問卷與自我效能量表
+                </h1>
+                <p class="mt-3 text-base text-slate-600">
+                    請依照過去一段時間的狀況作答，包含行為問卷、自我效能量表、壓力量表與基本資料。
+                </p>
+            </div>
+        </header>
+
+        <main class="mx-auto max-w-5xl px-5 pb-16 pt-6">
+            <section v-if="showIntro"
+                class="rounded-3xl border border-white/70 bg-white/95 p-10 text-center shadow-card">
+                <div class="mx-auto max-w-2xl space-y-4">
+                    <p class="text-xs font-semibold tracking-[0.35em] text-lagoon">
+                        SURVEY INTRO
+                    </p>
+                    <h2 class="text-2xl font-semibold sm:text-3xl">問卷說明</h2>
+                    <p class="text-sm leading-relaxed text-slate-600">
+                        本問卷將蒐集照顧情形、自我效能與壓力狀況，以及基本資料。所有題目皆為必填，請依實際狀況作答。
+                    </p>
+                    <p v-if="successMessage"
+                        class="rounded-2xl bg-lagoon/10 px-4 py-3 text-sm font-semibold text-lagoon">
+                        {{ successMessage }}
+                    </p>
+                    <button type="button"
+                        class="mt-4 inline-flex items-center justify-center rounded-full bg-lagoon px-6 py-3 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5 hover:bg-teal-600"
+                        @click="startSurvey">
+                        確定，開始作答
+                    </button>
+                </div>
+            </section>
+
+            <section v-else class="mb-6 rounded-3xl border border-white/70 bg-white/95 p-5 shadow-card">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold tracking-[0.3em] text-slate-500">
+                            FORM STATUS
+                        </p>
+                        <p class="mt-2 text-sm text-slate-600">
+                            請完成所有題目後送出
+                        </p>
+                    </div>
+                    <button type="button"
+                        class="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-500 transition hover:border-lagoon hover:text-lagoon"
+                        @click="backToIntro">
+                        返回說明頁
+                    </button>
+                </div>
+                <div v-if="errorMessages.length"
+                    class="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+                    <p class="font-semibold">請先完成以下項目：</p>
+                    <ul class="mt-2 list-disc pl-5">
+                        <li v-for="message in errorMessages" :key="message">
+                            {{ message }}
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <section v-if="!showIntro" class="mb-8 rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold tracking-[0.3em] text-lagoon">
+                            PART A
+                        </p>
+                        <h2 class="mt-2 text-2xl font-semibold">A.精神行為症狀困擾程度量表</h2>
+                        <p class="mt-2 text-sm text-slate-600">
+                            請您閱讀以下題目敘述後，並根據實際照顧情況，勾選對應選項。
+                            <br>
+                            第一部分：
+                            在過去三個月內，失智家人是否有出現該類行為
+                            【勾選2.有發生者，請續答第二部分】
+                            <br>
+                            第二部分：
+                            您對失智症家人出現該類行為，感到的困擾程度?
+                        </p>
+                    </div>
+                    <span class="rounded-full bg-lagoon/10 px-4 py-1 text-xs font-semibold text-lagoon">
+                        共 {{ behaviorQuestions.length }} 題
+                    </span>
+                </div>
+            </section>
+
+            <div v-if="!showIntro" class="space-y-5">
+                <section v-for="question in behaviorQuestions" :key="`behavior-${question.id}`"
+                    class="rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400">題目 {{ question.id }}</p>
+                            <h3 class="mt-1 text-xl font-semibold">{{ question.title }}</h3>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-600">
+                                {{ question.text }}
+                            </p>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-2 text-xs text-slate-400">
+                            必填
+                        </div>
+                    </div>
+
+                    <div class="mt-5 grid gap-3 sm:grid-cols-2">
+                        <label
+                            class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-lagoon hover:bg-lagoon/5">
+                            <input class="h-4 w-4 accent-lagoon" type="radio" :name="`occurrence-${question.id}`"
+                                value="1" v-model="question.occurrence" />
+                            <span class="text-sm font-medium">1. 從未發生</span>
+                        </label>
+                        <label
+                            class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-coral hover:bg-coral/5">
+                            <input class="h-4 w-4 accent-coral" type="radio" :name="`occurrence-${question.id}`"
+                                value="2" v-model="question.occurrence" />
+                            <span class="text-sm font-medium">2. 有發生</span>
+                        </label>
+                    </div>
+
+                    <div v-if="question.occurrence === '2'"
+                        class="mt-4 rounded-2xl border border-coral/40 bg-coral/5 p-4">
+                        <p class="text-sm font-semibold text-coral">困擾程度</p>
+                        <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                            <label
+                                class="flex cursor-pointer items-center gap-3 rounded-2xl border border-coral/30 bg-white px-4 py-2 transition hover:bg-white">
+                                <input class="h-4 w-4 accent-coral" type="radio" :name="`distress-${question.id}`"
+                                    value="1" v-model="question.distress" />
+                                <span class="text-sm">1. 完全不困擾</span>
+                            </label>
+                            <label
+                                class="flex cursor-pointer items-center gap-3 rounded-2xl border border-coral/30 bg-white px-4 py-2 transition hover:bg-white">
+                                <input class="h-4 w-4 accent-coral" type="radio" :name="`distress-${question.id}`"
+                                    value="2" v-model="question.distress" />
+                                <span class="text-sm">2. 有點困擾</span>
+                            </label>
+                            <label
+                                class="flex cursor-pointer items-center gap-3 rounded-2xl border border-coral/30 bg-white px-4 py-2 transition hover:bg-white">
+                                <input class="h-4 w-4 accent-coral" type="radio" :name="`distress-${question.id}`"
+                                    value="3" v-model="question.distress" />
+                                <span class="text-sm">3. 非常困擾</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section v-if="!showIntro" class="mt-10 rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold tracking-[0.3em] text-iris">
+                            PART B
+                        </p>
+                        <h2 class="mt-2 text-2xl font-semibold">自我效能量表</h2>
+                        <p class="mt-2 text-sm text-slate-600">
+                            本大題之目的是想了解當家人從機構返家後，您對於照顧家人的信心程度。請仔細考慮以下情境，並選擇最符合您真實情況的欄位。
+                        </p>
+                    </div>
+                    <span class="rounded-full bg-iris/10 px-4 py-1 text-xs font-semibold text-iris">
+                        共 {{ efficacyQuestions.length }} 題
+                    </span>
+                </div>
+            </section>
+
+            <div v-if="!showIntro" class="mt-5 space-y-5">
+                <section v-for="question in efficacyQuestions" :key="`efficacy-${question.id}`"
+                    class="rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400">題目 {{ question.id }}</p>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-700">
+                                {{ question.text }}
+                            </p>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-2 text-xs text-slate-400">
+                            必填
+                        </div>
+                    </div>
+
+                    <div class="mt-5 grid gap-3 sm:grid-cols-5">
+                        <label v-for="option in efficacyOptions" :key="option.value"
+                            class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm transition hover:border-iris hover:bg-iris/5">
+                            <input class="h-4 w-4 accent-iris" type="radio" :name="`efficacy-${question.id}`"
+                                :value="option.value" v-model="question.answer" />
+                            <span>{{ option.label }}</span>
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <section v-if="!showIntro" class="mt-10 rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold tracking-[0.3em] text-pine">
+                            PART C
+                        </p>
+                        <h2 class="mt-2 text-2xl font-semibold">照顧者壓力量表</h2>
+                        <p class="mt-2 text-sm text-slate-600">
+                            請您閱讀以下敘述，並根據最近三個月實際照顧之情況，選擇對應選項。
+                        </p>
+                    </div>
+                    <span class="rounded-full bg-pine/10 px-4 py-1 text-xs font-semibold text-pine">
+                        共 {{ stressQuestions.length }} 題
+                    </span>
+                </div>
+            </section>
+
+            <div v-if="!showIntro" class="mt-5 space-y-5">
+                <section v-for="question in stressQuestions" :key="`stress-${question.id}`"
+                    class="rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                    <div class="flex flex-wrap items-start justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-400">題目 {{ question.id }}</p>
+                            <p class="mt-2 text-sm leading-relaxed text-slate-700">
+                                {{ question.text }}
+                            </p>
+                        </div>
+                        <div class="rounded-2xl bg-slate-50 px-4 py-2 text-xs text-slate-400">
+                            必填
+                        </div>
+                    </div>
+
+                    <div class="mt-5 grid gap-3 sm:grid-cols-4">
+                        <label v-for="option in stressOptions" :key="option.value"
+                            class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-sm transition hover:border-pine hover:bg-pine/5">
+                            <input class="h-4 w-4 accent-pine" type="radio" :name="`stress-${question.id}`"
+                                :value="option.value" v-model="question.answer" />
+                            <span>{{ option.label }}</span>
+                        </label>
+                    </div>
+                </section>
+            </div>
+
+            <section v-if="!showIntro" class="mt-10 rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold tracking-[0.3em] text-slate-500">
+                            PART D
+                        </p>
+                        <h2 class="mt-2 text-2xl font-semibold">失智症患者個人資料</h2>
+                        <p class="mt-2 text-sm text-slate-600">勾選與數字填空</p>
+                    </div>
+                </div>
+            </section>
+
+            <div v-if="!showIntro" class="mt-5 space-y-5">
+                <section class="rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                    <div class="space-y-6 text-sm text-slate-700">
+                        <div>
+                            <p class="font-semibold text-slate-800">1. 年齡</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">年齡</span>
+                                    <input type="number" min="0"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-lagoon focus:outline-none"
+                                        v-model="personalInfo.age" placeholder="歲" />
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">出生於民前/國</span>
+                                    <input type="number" min="0"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-lagoon focus:outline-none"
+                                        v-model="personalInfo.birthYear" placeholder="年" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">2. 生理性別</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                <label v-for="option in personalOptions.gender" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-lagoon hover:bg-lagoon/5">
+                                    <input class="h-4 w-4 accent-lagoon" type="radio" name="personal-gender"
+                                        :value="option.value" v-model="personalInfo.gender" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">3. 婚姻狀況</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                                <label v-for="option in personalOptions.marital" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-lagoon hover:bg-lagoon/5">
+                                    <input class="h-4 w-4 accent-lagoon" type="radio" name="personal-marital"
+                                        :value="option.value" v-model="personalInfo.maritalStatus" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <input class="h-4 w-4 accent-lagoon" type="radio" name="personal-marital"
+                                        value="other" v-model="personalInfo.maritalStatus" />
+                                    <span>其他</span>
+                                    <input type="text"
+                                        class="ml-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-lagoon focus:outline-none"
+                                        v-model="personalInfo.maritalOther" placeholder="請填寫" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">4. 失智的程度</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-4">
+                                <label v-for="option in personalOptions.severity" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-lagoon hover:bg-lagoon/5">
+                                    <input class="h-4 w-4 accent-lagoon" type="radio" name="personal-severity"
+                                        :value="option.value" v-model="personalInfo.severity" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">5. 患有失智症的時間</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">已患病</span>
+                                    <input type="number" min="0"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-lagoon focus:outline-none"
+                                        v-model="personalInfo.durationMonths" placeholder="月" />
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">從民國</span>
+                                    <input type="number" min="0"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-lagoon focus:outline-none"
+                                        v-model="personalInfo.startYear" placeholder="年" />
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">開始月份</span>
+                                    <input type="number" min="1" max="12"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-lagoon focus:outline-none"
+                                        v-model="personalInfo.startMonth" placeholder="月" />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section v-if="!showIntro" class="mt-10 rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div>
+                        <p class="text-xs font-semibold tracking-[0.3em] text-slate-500">
+                            PART E
+                        </p>
+                        <h2 class="mt-2 text-2xl font-semibold">家庭照顧者基本資料</h2>
+                        <p class="mt-2 text-sm text-slate-600">勾選與數字填空</p>
+                    </div>
+                </div>
+            </section>
+
+            <div v-if="!showIntro" class="mt-5 space-y-5">
+                <section class="rounded-3xl border border-white/70 bg-white/95 p-6 shadow-card">
+                    <div class="space-y-6 text-sm text-slate-700">
+                        <div>
+                            <p class="font-semibold text-slate-800">1. 年齡</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">年齡</span>
+                                    <input type="number" min="0"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-iris focus:outline-none"
+                                        v-model="caregiverInfo.age" placeholder="歲" />
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">出生於民前/國</span>
+                                    <input type="number" min="0"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-iris focus:outline-none"
+                                        v-model="caregiverInfo.birthYear" placeholder="年" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">2. 生理性別</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                <label v-for="option in caregiverOptions.gender" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-iris hover:bg-iris/5">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-gender"
+                                        :value="option.value" v-model="caregiverInfo.gender" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">3. 婚姻狀況</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                                <label v-for="option in caregiverOptions.marital" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-iris hover:bg-iris/5">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-marital"
+                                        :value="option.value" v-model="caregiverInfo.maritalStatus" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-marital"
+                                        value="other" v-model="caregiverInfo.maritalStatus" />
+                                    <span>其他</span>
+                                    <input type="text"
+                                        class="ml-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-iris focus:outline-none"
+                                        v-model="caregiverInfo.maritalOther" placeholder="請填寫" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">4. 就業情況</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                                <label v-for="option in caregiverOptions.employment" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-iris hover:bg-iris/5">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-employment"
+                                        :value="option.value" v-model="caregiverInfo.employment" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-employment"
+                                        value="other" v-model="caregiverInfo.employment" />
+                                    <span>其他</span>
+                                    <input type="text"
+                                        class="ml-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-iris focus:outline-none"
+                                        v-model="caregiverInfo.employmentOther" placeholder="請填寫" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">
+                                5. 自覺健康狀況與過去一個月相比
+                            </p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                <label v-for="option in caregiverOptions.health" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-iris hover:bg-iris/5">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-health"
+                                        :value="option.value" v-model="caregiverInfo.health" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">6. 與被照顧者之關係</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                                <label v-for="option in caregiverOptions.relationship" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-iris hover:bg-iris/5">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-relationship"
+                                        :value="option.value" v-model="caregiverInfo.relationship" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-relationship"
+                                        value="other" v-model="caregiverInfo.relationship" />
+                                    <span>其他</span>
+                                    <input type="text"
+                                        class="ml-2 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-iris focus:outline-none"
+                                        v-model="caregiverInfo.relationshipOther" placeholder="請填寫" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">7. 照顧時間</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">已照顧</span>
+                                    <input type="number" min="0"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-iris focus:outline-none"
+                                        v-model="caregiverInfo.careMonths" placeholder="月" />
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">從民國</span>
+                                    <input type="number" min="0"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-iris focus:outline-none"
+                                        v-model="caregiverInfo.startYear" placeholder="年" />
+                                </label>
+                                <label
+                                    class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                                    <span class="text-slate-500">開始月份</span>
+                                    <input type="number" min="1" max="12"
+                                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-iris focus:outline-none"
+                                        v-model="caregiverInfo.startMonth" placeholder="月" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <p class="font-semibold text-slate-800">8. 是否使用小規模多機能服務</p>
+                            <div class="mt-3 grid gap-3 sm:grid-cols-2">
+                                <label v-for="option in caregiverOptions.serviceUse" :key="option.value"
+                                    class="flex cursor-pointer items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 transition hover:border-iris hover:bg-iris/5">
+                                    <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-service"
+                                        :value="option.value" v-model="caregiverInfo.serviceUse" />
+                                    <span>{{ option.label }}</span>
+                                </label>
+                            </div>
+
+                            <div v-if="caregiverInfo.serviceUse === 'no'"
+                                class="mt-4 rounded-2xl border border-iris/30 bg-iris/5 p-4">
+                                <p class="text-sm font-semibold text-iris">
+                                    有使用其他長照服務?
+                                </p>
+                                <div class="mt-3 grid gap-3 sm:grid-cols-3">
+                                    <label v-for="option in caregiverOptions.otherService" :key="option.value"
+                                        class="flex cursor-pointer items-center gap-3 rounded-2xl border border-iris/30 bg-white px-4 py-2 text-sm">
+                                        <input class="h-4 w-4 accent-iris" type="radio" name="caregiver-other-service"
+                                            :value="option.value" v-model="caregiverInfo.otherService" />
+                                        <span>{{ option.label }}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <section v-if="!showIntro" class="mt-10 text-center">
+                <button type="button"
+                    class="inline-flex items-center justify-center rounded-full bg-ink px-8 py-3 text-sm font-semibold text-white shadow-card transition hover:-translate-y-0.5 hover:bg-slate-900"
+                    @click="submitSurvey">
+                    送出問卷
+                </button>
+            </section>
+        </main>
+    </div>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script>
+        const behaviorQuestionList = [
+            {
+                id: 1,
+                title: "遊走",
+                text:
+                    "失智症家人是否會無目的地走動、重複的往返踱步，有可能未注意到安全、有走失的風險?",
+            },
+            {
+                id: 2,
+                title: "日夜顛倒/作息混亂",
+                text:
+                    "失智症家人是否有白天嗜睡及夜間睡眠困難?是否半夜醒來，難以再度入睡?是否會半夜遊走、半夜著裝、或者半夜干擾你的睡眠?",
+            },
+            {
+                id: 3,
+                title: "語言攻擊行為",
+                text: "失智症家人是否曾大叫或生氣的咒罵?或者不斷抱怨?",
+            },
+            {
+                id: 4,
+                title: "肢體攻擊行為",
+                text:
+                    "失智症家人是否曾試圖攻擊別人?不包括語言攻擊及未朝向他人之攻擊。",
+            },
+            {
+                id: 5,
+                title: "干擾行為",
+                text:
+                    "失智症家人是否會任意翻動別人物品、或者有其他影響別人不恰當或破壞性的行為?(如：製造奇怪聲響、弄髒自己、暴食、亂丟食物、亂翻他人物品、儲藏物品、社交上不恰當的行為、偷竊行為等)",
+            },
+            {
+                id: 6,
+                title: "抗拒照護",
+                text:
+                    "失智症家人是否曾經拒絕跟照顧者合作或者不讓別人幫他忙?例如對試圖幫助他的人發脾氣?",
+            },
+            {
+                id: 7,
+                title: "妄想",
+                text:
+                    "失智症家人是否存有你認為非事實的信念?例如：堅持有人要傷害他或者偷他東西，說過「家人不是他的家人」或者「自己的家不是他的家」?",
+            },
+            {
+                id: 8,
+                title: "幻覺",
+                text:
+                    "失智症家人是否存有幻覺，例如看見實際不存在的人物或東西?或聽見不存在的聲音等?",
+            },
+            {
+                id: 9,
+                title: "恐懼或焦慮",
+                text:
+                    "失智症家人是否非常緊張、擔心、或者沒來由的感到害怕?個案是否看起來緊繃或者煩躁?個案是否害怕你不在身邊?",
+            },
+            {
+                id: 10,
+                title: "憂鬱及負性症狀",
+                text:
+                    "失智症家人是否看起來或者說過他感到憂傷或難過?或者表現出無精打采、不感興趣的樣子?如：心情低落、活動量降低(不想動、不講話、雙眼呆滯無神)、胃口差、社會退縮、貶低自己或者認為自己是失敗者、認為自己很壞、看起來喪志、認為自己是家人負擔等。",
+            },
+            {
+                id: 11,
+                title: "自傷行為及自殺(包含意念及行為)",
+                text:
+                    "失智症家人是否有自我傷害如撞牆、咬舌、咬身體及割腕或身體、故意跌倒(不包括拒絕進食)、企圖自殺、計畫自殺、有自殺意念或持續想到死亡。",
+            },
+            {
+                id: 12,
+                title: "重複行為",
+                text:
+                    "失智症家人是否會重複無目的行為如開關衣櫃或抽屜、重覆的撿東西、纏繞繩子或線頭、或者重複句子或問題(如“現在幾點?現在幾點?現在幾點?”一直重複問此句話)，或者出現自我刺激的特殊行為(如搖手、敲頭、任意晃動身體、拍打敲打等尋求身體刺激的行為)。",
+            },
+            {
+                id: 13,
+                title: "對物品的攻擊行為",
+                text:
+                    "失智症家人是否曾摔門、踢或破壞家具，或者縱火、破壞物品、丟東西?",
+            },
+            {
+                id: 14,
+                title: "其他不適當以及不潔行為",
+                text:
+                    "失智症家人是否有任何不潔的行為。例如隨地吐口水或者玩弄自己的排泄物、公開場合寬衣解帶、公開場合自慰或言語性暗示或挑逗、異食癖，或其他讓人感到難堪的事。",
+            },
+        ];
+
+        const efficacyQuestionList = [
+            {
+                id: 1,
+                text:
+                    "如果必須外出辦一些重要的事，您有信心可以請到朋友或家人幫忙照顧失智症家人一天?",
+            },
+            {
+                id: 2,
+                text:
+                    "當感覺需要休息時，您有信心可以請到朋友或家人幫忙照顧失智症家人?",
+            },
+            {
+                id: 3,
+                text:
+                    "如果由於身體因素，須立刻去看醫生，您有信心可以請到朋友或家人幫忙照顧失智症家人一天?",
+            },
+            {
+                id: 4,
+                text:
+                    "您有信心可以請到朋友或家人幫您完成瑣事，例如到郵局取包裹、排隊繳費?",
+            },
+            {
+                id: 5,
+                text:
+                    "當需要空閒時間時，您有多少信心可以請到朋友或家人幫忙照顧失智症家人一週?",
+            },
+            {
+                id: 6,
+                text:
+                    "您有信心不去想起在照顧失智症家人生病前您的生活有多美好?",
+            },
+            {
+                id: 7,
+                text: "您有信心不去想起因為失智症家人而錯過或放棄了甚麼?",
+            },
+            {
+                id: 8,
+                text:
+                    "您有信心不去想起失智症家人未來會發生甚麼困境?(例如：失能狀況惡化)",
+            },
+            {
+                id: 9,
+                text: "您有信心不去想起照顧失智症家人所帶來的不愉快的感受?",
+            },
+            {
+                id: 10,
+                text: "您有信心不去想起照顧工作是一件不公平的事嗎?",
+            },
+            {
+                id: 11,
+                text:
+                    "當失智症家人在午餐後一個小時內多次詢問午餐在哪裡時，您有信心可以平和回答而不提高聲調?",
+            },
+            {
+                id: 12,
+                text:
+                    "備餐時被失智症家人多次打擾時，您有信心可以平和回應他而不提高聲音?",
+            },
+            {
+                id: 13,
+                text:
+                    "因為失智症家人不斷重複提出相同問題而感到生氣時，您有信心可以找到方式，讓自己平靜下來?",
+            },
+            {
+                id: 14,
+                text:
+                    "當失能家人忘記日常作息，您有信心可以平和回答他而不提高聲調?",
+            },
+            {
+                id: 15,
+                text:
+                    "當失智症家人抱怨被您照顧地如何不好時，您有信心可以平和回應他/她而不發生爭執?",
+            },
+        ];
+
+        const stressQuestionList = [
+            { id: 1, text: "您覺得身體不舒服時還是要照顧失智症家人" },
+            { id: 2, text: "您對於照顧時感到疲倦" },
+            { id: 3, text: "您對於照顧工作感到體力負擔重" },
+            { id: 4, text: "您覺得會受到失智症家人的情緒影響" },
+            { id: 5, text: "睡眠被干擾(因為失智症家人在夜裡無法安睡)" },
+            { id: 6, text: "因為照顧失智症家人讓您的健康變壞了" },
+            { id: 7, text: "對於照顧工作感到心力交瘁" },
+            { id: 8, text: "照顧失智症家人讓您精神上覺得痛苦" },
+            { id: 9, text: "當您和失智症家人在一起時，會感到生氣" },
+            { id: 10, text: "因為照顧失智症家人影響到您原先的旅行計畫" },
+            { id: 11, text: "因為照顧失智症家人導致與親朋好友交往受影響" },
+            { id: 12, text: "您必須時時刻刻都要注意失智症家人" },
+            { id: 13, text: "照顧失智症家人的花費大，造成負擔" },
+            { id: 14, text: "不能外出工作家庭收入受影響" },
+        ];
+
+        const efficacyOptions = [
+            { value: "1", label: "1. 非常沒信心" },
+            { value: "2", label: "2. 沒信心" },
+            { value: "3", label: "3. 普通" },
+            { value: "4", label: "4. 有信心" },
+            { value: "5", label: "5. 非常有信心" },
+        ];
+
+        const stressOptions = [
+            { value: "1", label: "1. 從來沒有" },
+            { value: "2", label: "2. 很少如此" },
+            { value: "3", label: "3. 有時如此" },
+            { value: "4", label: "4. 常常如此" },
+        ];
+
+        const personalOptions = {
+            gender: [
+                { value: "male", label: "男" },
+                { value: "female", label: "女" },
+            ],
+            marital: [
+                { value: "married", label: "已婚" },
+                { value: "widowed", label: "喪偶" },
+                { value: "divorced", label: "離婚" },
+                { value: "separated", label: "分居" },
+                { value: "single", label: "未婚" },
+            ],
+            severity: [
+                { value: "mild", label: "輕度" },
+                { value: "moderate", label: "中度" },
+                { value: "severe", label: "重度" },
+                { value: "very-severe", label: "極重度" },
+            ],
+        };
+
+        const caregiverOptions = {
+            gender: [
+                { value: "male", label: "男" },
+                { value: "female", label: "女" },
+            ],
+            marital: [
+                { value: "married", label: "已婚" },
+                { value: "widowed", label: "喪偶" },
+                { value: "divorced", label: "離婚" },
+                { value: "separated", label: "分居" },
+                { value: "single", label: "未婚" },
+            ],
+            employment: [
+                { value: "full-time", label: "全職全薪" },
+                { value: "part-time", label: "兼職" },
+                { value: "unemployed", label: "失業" },
+                { value: "seeking", label: "謀職中" },
+                { value: "student", label: "學生" },
+                { value: "homemaker", label: "家管" },
+                { value: "retired", label: "退休" },
+                { value: "early-retired", label: "因照顧原因提早退休或離職" },
+            ],
+            health: [
+                { value: "very-healthy", label: "非常健康" },
+                { value: "healthy", label: "健康" },
+                { value: "unhealthy", label: "不健康" },
+                { value: "very-unhealthy", label: "非常不健康" },
+            ],
+            relationship: [
+                { value: "parent", label: "父母" },
+                { value: "spouse", label: "配偶" },
+                { value: "sibling", label: "手足" },
+                { value: "child", label: "子女" },
+                { value: "in-law", label: "媳婦/女婿" },
+                { value: "grandchild", label: "孫子女" },
+            ],
+            serviceUse: [
+                { value: "yes", label: "有" },
+                { value: "no", label: "無" },
+            ],
+            otherService: [
+                { value: "daycare", label: "日照中心" },
+                { value: "home-care", label: "居家服務" },
+                { value: "none", label: "無" },
+            ],
+        };
+
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    showIntro: true,
+                    successMessage: "",
+                    errorMessages: [],
+                    behaviorQuestions: behaviorQuestionList.map((item) => ({
+                        ...item,
+                        occurrence: "",
+                        distress: "",
+                    })),
+                    efficacyQuestions: efficacyQuestionList.map((item) => ({
+                        ...item,
+                        answer: "",
+                    })),
+                    stressQuestions: stressQuestionList.map((item) => ({
+                        ...item,
+                        answer: "",
+                    })),
+                    efficacyOptions,
+                    stressOptions,
+                    personalOptions,
+                    personalInfo: {
+                        age: "",
+                        birthYear: "",
+                        gender: "",
+                        maritalStatus: "",
+                        maritalOther: "",
+                        severity: "",
+                        durationMonths: "",
+                        startYear: "",
+                        startMonth: "",
+                    },
+                    caregiverOptions,
+                    caregiverInfo: {
+                        age: "",
+                        birthYear: "",
+                        gender: "",
+                        maritalStatus: "",
+                        maritalOther: "",
+                        employment: "",
+                        employmentOther: "",
+                        health: "",
+                        relationship: "",
+                        relationshipOther: "",
+                        careMonths: "",
+                        startYear: "",
+                        startMonth: "",
+                        serviceUse: "",
+                        otherService: "",
+                    },
+                };
+            },
+            methods: {
+                startSurvey() {
+                    this.showIntro = false;
+                    this.successMessage = "";
+                    this.errorMessages = [];
+                },
+                backToIntro() {
+                    this.showIntro = true;
+                    this.errorMessages = [];
+                },
+                resetSurvey() {
+                    this.behaviorQuestions.forEach((item) => {
+                        item.occurrence = "";
+                        item.distress = "";
+                    });
+                    this.efficacyQuestions.forEach((item) => {
+                        item.answer = "";
+                    });
+                    this.stressQuestions.forEach((item) => {
+                        item.answer = "";
+                    });
+                    this.personalInfo = {
+                        age: "",
+                        birthYear: "",
+                        gender: "",
+                        maritalStatus: "",
+                        maritalOther: "",
+                        severity: "",
+                        durationMonths: "",
+                        startYear: "",
+                        startMonth: "",
+                    };
+                    this.caregiverInfo = {
+                        age: "",
+                        birthYear: "",
+                        gender: "",
+                        maritalStatus: "",
+                        maritalOther: "",
+                        employment: "",
+                        employmentOther: "",
+                        health: "",
+                        relationship: "",
+                        relationshipOther: "",
+                        careMonths: "",
+                        startYear: "",
+                        startMonth: "",
+                        serviceUse: "",
+                        otherService: "",
+                    };
+                },
+                buildPayload() {
+                    const behavior = this.behaviorQuestions.map((item) => {
+                        let finalAnswer = "";
+                        if (item.occurrence === "1") {
+                            finalAnswer = "1";
+                        } else if (item.occurrence === "2") {
+                            if (item.distress === "1") finalAnswer = "2";
+                            if (item.distress === "2") finalAnswer = "3";
+                            if (item.distress === "3") finalAnswer = "4";
+                        }
+                        return {
+                            id: item.id,
+                            title: item.title,
+                            answer: finalAnswer,
+                        };
+                    });
+
+                    return {
+                        behavior,
+                        efficacy: this.efficacyQuestions.map((item) => ({
+                            id: item.id,
+                            answer: item.answer,
+                        })),
+                        stress: this.stressQuestions.map((item) => ({
+                            id: item.id,
+                            answer: item.answer,
+                        })),
+                        personalInfo: { ...this.personalInfo },
+                        caregiverInfo: { ...this.caregiverInfo },
+                    };
+                },
+                validateSurvey() {
+                    const errors = [];
+
+                    this.behaviorQuestions.forEach((item) => {
+                        if (!item.occurrence) {
+                            errors.push(`第一大題：第 ${item.id} 題尚未選擇是否發生`);
+                        } else if (item.occurrence === "2" && !item.distress) {
+                            errors.push(`第一大題：第 ${item.id} 題尚未選擇困擾程度`);
+                        }
+                    });
+
+                    this.efficacyQuestions.forEach((item) => {
+                        if (!item.answer) {
+                            errors.push(`第二大題：第 ${item.id} 題尚未選擇`);
+                        }
+                    });
+
+                    this.stressQuestions.forEach((item) => {
+                        if (!item.answer) {
+                            errors.push(`第三大題：第 ${item.id} 題尚未選擇`);
+                        }
+                    });
+
+                    if (!this.personalInfo.age) errors.push("個人資料：年齡尚未填寫");
+                    if (!this.personalInfo.birthYear) errors.push("個人資料：出生年份尚未填寫");
+                    if (!this.personalInfo.gender) errors.push("個人資料：生理性別尚未選擇");
+                    if (!this.personalInfo.maritalStatus)
+                        errors.push("個人資料：婚姻狀況尚未選擇");
+                    if (
+                        this.personalInfo.maritalStatus === "other" &&
+                        !this.personalInfo.maritalOther
+                    )
+                        errors.push("個人資料：婚姻狀況其他尚未填寫");
+                    if (!this.personalInfo.severity) errors.push("個人資料：失智程度尚未選擇");
+                    if (!this.personalInfo.durationMonths)
+                        errors.push("個人資料：患病月數尚未填寫");
+                    if (!this.personalInfo.startYear) errors.push("個人資料：開始年份尚未填寫");
+                    if (!this.personalInfo.startMonth) errors.push("個人資料：開始月份尚未填寫");
+
+                    if (!this.caregiverInfo.age) errors.push("照顧者資料：年齡尚未填寫");
+                    if (!this.caregiverInfo.birthYear)
+                        errors.push("照顧者資料：出生年份尚未填寫");
+                    if (!this.caregiverInfo.gender) errors.push("照顧者資料：生理性別尚未選擇");
+                    if (!this.caregiverInfo.maritalStatus)
+                        errors.push("照顧者資料：婚姻狀況尚未選擇");
+                    if (
+                        this.caregiverInfo.maritalStatus === "other" &&
+                        !this.caregiverInfo.maritalOther
+                    )
+                        errors.push("照顧者資料：婚姻狀況其他尚未填寫");
+                    if (!this.caregiverInfo.employment)
+                        errors.push("照顧者資料：就業情況尚未選擇");
+                    if (
+                        this.caregiverInfo.employment === "other" &&
+                        !this.caregiverInfo.employmentOther
+                    )
+                        errors.push("照顧者資料：就業情況其他尚未填寫");
+                    if (!this.caregiverInfo.health)
+                        errors.push("照顧者資料：健康狀況尚未選擇");
+                    if (!this.caregiverInfo.relationship)
+                        errors.push("照顧者資料：與被照顧者關係尚未選擇");
+                    if (
+                        this.caregiverInfo.relationship === "other" &&
+                        !this.caregiverInfo.relationshipOther
+                    )
+                        errors.push("照顧者資料：關係其他尚未填寫");
+                    if (!this.caregiverInfo.careMonths)
+                        errors.push("照顧者資料：照顧月數尚未填寫");
+                    if (!this.caregiverInfo.startYear)
+                        errors.push("照顧者資料：開始年份尚未填寫");
+                    if (!this.caregiverInfo.startMonth)
+                        errors.push("照顧者資料：開始月份尚未填寫");
+                    if (!this.caregiverInfo.serviceUse)
+                        errors.push("照顧者資料：是否使用小規模多機能服務尚未選擇");
+                    if (
+                        this.caregiverInfo.serviceUse === "no" &&
+                        !this.caregiverInfo.otherService
+                    )
+                        errors.push("照顧者資料：其他長照服務尚未選擇");
+
+                    this.errorMessages = errors;
+                    return errors.length === 0;
+                },
+                async submitSurvey() {
+                    this.errorMessages = [];
+                    if (!this.validateSurvey()) {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                        return;
+                    }
+
+                    const payload = this.buildPayload();
+
+                    try {
+                        const response = await fetch("https://example.com/api/survey", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify(payload),
+                        });
+
+                        console.log("送出 payload", payload);
+                        console.log("API 回應狀態", response.status);
+
+                        if (response.status === 200) {
+                            this.successMessage = "已成功送出，感謝填寫！";
+                            this.resetSurvey();
+                            this.showIntro = true;
+                        } else {
+                            alert("送出失敗，請稍後再試。");
+                        }
+                    } catch (error) {
+                        console.log("送出失敗", error);
+                        alert("送出失敗，請稍後再試。");
+                    }
+                },
+            },
+        }).mount("#app");
+    </script>
+</body>
+
+</html>
